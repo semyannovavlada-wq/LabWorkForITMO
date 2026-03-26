@@ -17,6 +17,17 @@ public class CommandService {
         this.commandList = new HashMap<>();
         this.commandList.put("exit", new ExitHandler());
         this.commandList.put("help", new HelpHandler());
+        this.commandList.put("MeasAdd", new MeasAddHandler());
+        this.commandList.put("MeasList", new MeasListHandler());
+        this.commandList.put("MeasStat", new MeasStatsHandler());
+        this.commandList.put("ProtApply", new ProtApplyHandler());
+        this.commandList.put("ProtCreate", new ProtCreateHandler());
+        this.commandList.put("SampleAdd", new SampleAddHandler());
+        this.commandList.put("SampleArchive", new SampleArchiveHandler());
+        this.commandList.put("SampleList", new SampleListHandler());
+        this.commandList.put("SampleShow", new SampleShowHandler());
+        this.commandList.put("SampleUpdate", new SampleUpdateHandler());
+
 
         this.sampleService = new org.example.services.SampleService();
     }
