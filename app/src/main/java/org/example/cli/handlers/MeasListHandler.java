@@ -5,6 +5,7 @@ import org.example.domain.Measurement;
 import org.example.domain.MeasurementParam;
 import org.example.domain.Sample;
 import org.example.services.MeasurementService;
+import org.example.services.ProtocolService;
 import org.example.services.SampleService;
 
 import java.time.format.DateTimeFormatter;
@@ -21,7 +22,7 @@ public class MeasListHandler implements BaseHandler {
         try {
             // Получаем ID образца
             if (params == null || params.isEmpty()) {
-                System.out.println("Ошибка: не указан ID образца");
+                System.out.println("error: ID ");
                 return true;
             }
 
@@ -57,14 +58,19 @@ public class MeasListHandler implements BaseHandler {
             }
 
         } catch (NumberFormatException e) {
-            System.out.println("Ошибка: неверный формат ID");
+            System.out.println("Error: wrong ID");
         } catch (java.util.NoSuchElementException e) {
-            System.out.println("Ошибка: " + e.getMessage());
+            System.out.println("Error: " + e.getMessage());
         } catch (Exception e) {
-            System.out.println("Ошибка: " + e.getMessage());
+            System.out.println("Error: " + e.getMessage());
         }
 
         return true;
+    }
+
+    @Override
+    public boolean handle(List<String> params, SampleService sampleService, MeasurementService measurementService, ProtocolService protocolService, Collection<BaseHandler> commandList) {
+        return false;
     }
 
     @Override
@@ -74,6 +80,6 @@ public class MeasListHandler implements BaseHandler {
 
     @Override
     public String help() {
-        return "meas_list <sample_id> [--last N] - list measurements for sample";
+        return "MeasList <sample_id> [--last N] - list measurements for sample";
     }
 }

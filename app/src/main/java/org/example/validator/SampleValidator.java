@@ -1,7 +1,6 @@
 package org.example.validator;
 
 public class SampleValidator {
-
     private static final int MAX_NAME_LENGTH = 128;
     private static final int MAX_TYPE_LENGTH = 64;
     private static final int MAX_LOCATION_LENGTH = 64;

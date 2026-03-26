@@ -3,13 +3,15 @@ package org.example.services;
 import org.example.domain.Measurement;
 import org.example.domain.MeasurementParam;
 import org.example.domain.Sample;
+import org.example.domain.SampleStatus;
 import org.example.validator.MeasurementValidator;
 
 import java.time.Instant;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class MeasurementService {
-    private final TreeMap<Long, Measurement> measurements = new TreeMap<>();
+    private final List<Measurement> measurements = new ArrayList<>();
     private final SampleService sampleService;
     private long nextId = 1L;
 
@@ -17,21 +19,11 @@ public class MeasurementService {
         this.sampleService = sampleService;
     }
 
-    public Measurement add(
-            long sampleId,
-            MeasurementParam param,
-            double value,
-            String unit,
-            String method,
-            String ownerUsername,
-            Instant measuredAt
-    ) {
+    public Measurement add(long sampleId, MeasurementParam param, double value,
+                           String unit, String method, String ownerUsername) {
         Sample sample = sampleService.getById(sampleId);
-        if (sample == null) {
-            throw new IllegalArgumentException("Ошибка: образец с id=" + sampleId + " не найден");
-        }
 
-        if (sample.getStatus() != org.example.domain.SampleStatus.ACTIVE) {
+        if (sample.getStatus() != SampleStatus.ACTIVE) {
             throw new IllegalArgumentException("Ошибка: образец не активен, нельзя добавить измерение");
         }
 
@@ -48,48 +40,31 @@ public class MeasurementService {
                 value,
                 unit,
                 method,
-                measuredAt != null ? measuredAt : Instant.now(),
+                Instant.now(),
                 ownerUsername,
                 Instant.now(),
                 Instant.now()
         );
 
-        measurements.put(measurement.getId(), measurement);
+        measurements.add(measurement);
         return measurement;
-    }
-
-    public Measurement add(
-            long sampleId,
-            MeasurementParam param,
-            double value,
-            String unit,
-            String method,
-            String ownerUsername
-    ) {
-        return add(sampleId, param, value, unit, method, ownerUsername, Instant.now());
     }
 
     public Measurement getById(long id) {
-        Measurement measurement = measurements.get(id);
-        if (measurement == null) {
-            throw new NoSuchElementException("Ошибка: измерение с id=" + id + " не найдено");
-        }
-        return measurement;
+        return measurements.stream()
+                .filter(m -> m.getId() == id)
+                .findFirst()
+                .orElseThrow(() -> new NoSuchElementException("Ошибка: измерение с id=" + id + " не найдено"));
     }
 
     public List<Measurement> listBySample(long sampleId, Integer last) {
-        Sample sample = sampleService.getById(sampleId);
-        if (sample == null) {
-            throw new IllegalArgumentException("Ошибка: образец с id=" + sampleId + " не найден");
-        }
-
-        List<Measurement> result = measurements.values().stream()
+        List<Measurement> result = measurements.stream()
                 .filter(m -> m.getSampleId() == sampleId)
                 .sorted(Comparator.comparing(Measurement::getMeasuredAt).reversed())
-                .toList();
+                .collect(Collectors.toList());
 
         if (last != null && last > 0) {
-            return result.stream().limit(last).toList();
+            return result.stream().limit(last).collect(Collectors.toList());
         }
         return result;
     }
@@ -99,39 +74,28 @@ public class MeasurementService {
     }
 
     public List<Measurement> listByParam(MeasurementParam param, Integer last) {
-        List<Measurement> result = measurements.values().stream()
+        List<Measurement> result = measurements.stream()
                 .filter(m -> m.getParam() == param)
                 .sorted(Comparator.comparing(Measurement::getMeasuredAt).reversed())
-                .toList();
+                .collect(Collectors.toList());
 
         if (last != null && last > 0) {
-            return result.stream().limit(last).toList();
+            return result.stream().limit(last).collect(Collectors.toList());
         }
         return result;
     }
 
-    public Map<Long, Measurement> getBySampleId(long sampleId) {
-        TreeMap<Long, Measurement> result = new TreeMap<>();
-        measurements.values().stream()
-                .filter(m -> m.getSampleId() == sampleId)
-                .forEach(m -> result.put(m.getId(), m));
-        return result;
-    }
-
     public void removeBySampleId(long sampleId) {
-        getBySampleId(sampleId).keySet().forEach(measurements::remove);
+        measurements.removeIf(m -> m.getSampleId() == sampleId);
     }
 
     public boolean exists(long id) {
-        return measurements.containsKey(id);
+        return measurements.stream().anyMatch(m -> m.getId() == id);
     }
 
     public List<Measurement> getAll() {
-        return new ArrayList<>(measurements.values());
+        return measurements.stream()
+                .sorted(Comparator.comparing(Measurement::getId))
+                .collect(Collectors.toList());
     }
-
-    public Map<Long, Measurement> getAllAsMap() {
-        return new TreeMap<>(measurements);
-    }
-
 }

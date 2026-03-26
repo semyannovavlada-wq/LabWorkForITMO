@@ -5,6 +5,7 @@ import org.example.domain.Measurement;
 import org.example.domain.MeasurementParam;
 import org.example.domain.Sample;
 import org.example.services.MeasurementService;
+import org.example.services.ProtocolService;
 import org.example.services.SampleService;
 
 import java.util.Collection;
@@ -28,7 +29,7 @@ public class SampleShowHandler implements BaseHandler {
                 try {
                     id = Long.parseLong(params.get(0));
                 } catch (NumberFormatException e) {
-                    System.out.println("Ошибка: неверный формат ID");
+                    System.out.println("error: wrong ID");
                     return true;
                 }
             } else {
@@ -38,7 +39,7 @@ public class SampleShowHandler implements BaseHandler {
                 try {
                     id = Long.parseLong(input);
                 } catch (NumberFormatException e) {
-                    System.out.println("Ошибка: неверный формат ID");
+                    System.out.println("error: wrong ID");
                     return true;
                 }
             }
@@ -70,12 +71,17 @@ public class SampleShowHandler implements BaseHandler {
             System.out.println("params: " + (paramsStr.isEmpty() ? "—" : paramsStr));
 
         } catch (java.util.NoSuchElementException e) {
-            System.out.println("Ошибка: " + e.getMessage());
+            System.out.println("error: " + e.getMessage());
         } catch (Exception e) {
-            System.out.println("Ошибка: " + e.getMessage());
+            System.out.println("error: " + e.getMessage());
         }
 
         return true;
+    }
+
+    @Override
+    public boolean handle(List<String> params, SampleService sampleService, MeasurementService measurementService, ProtocolService protocolService, Collection<BaseHandler> commandList) {
+        return false;
     }
 
     @Override
@@ -85,6 +91,6 @@ public class SampleShowHandler implements BaseHandler {
 
     @Override
     public String help() {
-        return "sample_show <id> - show sample profile and measurements statistics";
+        return "SampleShow <id> - show sample profile and measurements statistics";
     }
 }

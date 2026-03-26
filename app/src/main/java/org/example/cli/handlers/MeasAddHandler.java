@@ -6,6 +6,7 @@ import org.example.domain.MeasurementParam;
 import org.example.domain.Sample;
 import org.example.domain.SampleStatus;
 import org.example.services.MeasurementService;
+import org.example.services.ProtocolService;
 import org.example.services.SampleService;
 
 import java.util.Collection;
@@ -21,7 +22,7 @@ public class MeasAddHandler implements BaseHandler {
                           Collection<BaseHandler> commandList) {
         try {
             if (params == null || params.isEmpty()) {
-                System.out.println("Ошибка: не указан ID образца");
+                System.out.println("error:  ID neede");
                 return true;
             }
 
@@ -29,54 +30,54 @@ public class MeasAddHandler implements BaseHandler {
             try {
                 sampleId = Long.parseLong(params.get(0));
             } catch (NumberFormatException e) {
-                System.out.println("Ошибка: неверный формат ID");
+                System.out.println("error: wrong ID");
                 return true;
             }
 
             Sample sample = sampleService.getById(sampleId);
 
             if (sample.getStatus() != SampleStatus.ACTIVE) {
-                System.out.println("Ошибка: нельзя добавлять измерения к ARCHIVED образцу");
+                System.out.println("error: can not change an ARCHIVED sample");
                 return true;
             }
 
             // Параметр
-            System.out.println("Параметр (PH/CONDUCTIVITY/TURBIDITY/NITRATE):");
+            System.out.println("param (PH/CONDUCTIVITY/TURBIDITY/NITRATE):");
             MeasurementParam param;
             try {
                 param = MeasurementParam.valueOf(String.join("", readerService.readCommand()).trim().toUpperCase());
             } catch (IllegalArgumentException e) {
-                System.out.println("Ошибка: неверный параметр");
+                System.out.println("Error: wrong parameter");
                 return true;
             }
 
             // Значение
-            System.out.println("Значение:");
+            System.out.println("value:");
             double value;
             try {
                 value = Double.parseDouble(String.join("", readerService.readCommand()).trim());
                 if (Double.isNaN(value) || Double.isInfinite(value)) {
-                    System.out.println("Ошибка: значение должно быть числом");
+                    System.out.println("Error: should be a number");
                     return true;
                 }
             } catch (NumberFormatException e) {
-                System.out.println("Ошибка: значение должно быть числом");
+                System.out.println("Error: should be a number");
                 return true;
             }
 
             // Единицы
-            System.out.println("Единицы:");
+            System.out.println("Error:");
             String unit = String.join("", readerService.readCommand()).trim();
             if (unit.isEmpty()) {
-                System.out.println("Ошибка: единицы не могут быть пустыми");
+                System.out.println("Error: units can not be null");
                 return true;
             }
 
             // Метод
-            System.out.println("Метод:");
+            System.out.println("Method:");
             String method = String.join("", readerService.readCommand()).trim();
             if (method.isEmpty()) {
-                System.out.println("Ошибка: метод не может быть пустым");
+                System.out.println("Error: method can not be empty");
                 return true;
             }
 
@@ -84,14 +85,19 @@ public class MeasAddHandler implements BaseHandler {
             System.out.println("OK measurement_id=" + measurement.getId());
 
         } catch (java.util.NoSuchElementException e) {
-            System.out.println("Ошибка: " + e.getMessage());
+            System.out.println("Error: " + e.getMessage());
         } catch (IllegalArgumentException e) {
-            System.out.println("Ошибка: " + e.getMessage());
+            System.out.println("Error: " + e.getMessage());
         } catch (Exception e) {
-            System.out.println("Ошибка: " + e.getMessage());
+            System.out.println("Error: " + e.getMessage());
         }
 
         return true;
+    }
+
+    @Override
+    public boolean handle(List<String> params, SampleService sampleService, MeasurementService measurementService, ProtocolService protocolService, Collection<BaseHandler> commandList) {
+        return false;
     }
 
     @Override
@@ -101,6 +107,6 @@ public class MeasAddHandler implements BaseHandler {
 
     @Override
     public String help() {
-        return "meas_add <sample_id> - add measurement to sample";
+        return "MeasAdd <sample_id> - add measurement to sample";
     }
 }

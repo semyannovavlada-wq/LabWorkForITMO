@@ -3,12 +3,27 @@
  */
 package org.example;
 
+import org.example.cli.services.CommandService;
+import org.example.cli.services.LoopService;
+import org.example.services.MeasurementService;
+import org.example.services.ProtocolService;
+import org.example.services.SampleService;
+
 public class App {
-    public String getGreeting() {
-        return "Hello World!";
-    }
 
     public static void main(String[] args) {
-        System.out.println(new App().getGreeting());
+        System.out.println("type help for help");
+
+        // Создаем сервисы
+        SampleService sampleService = new SampleService();
+        MeasurementService measurementService = new MeasurementService(sampleService);
+        ProtocolService protocolService = new ProtocolService(sampleService, measurementService);
+
+        // Создаем CommandService с сервисами
+        CommandService commandService = new CommandService(sampleService, measurementService, protocolService);
+
+        // Создаем LoopService и запускаем
+        LoopService loopService = new LoopService(commandService);
+        loopService.loopOfCommands();
     }
 }

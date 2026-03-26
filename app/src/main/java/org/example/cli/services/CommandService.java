@@ -1,8 +1,8 @@
 package org.example.cli.services;
 
-import org.example.cli.handlers.BaseHandler;
-import org.example.cli.handlers.ExitHandler;
-import org.example.cli.handlers.HelpHandler;
+import org.example.cli.handlers.*;
+import org.example.services.MeasurementService;
+import org.example.services.ProtocolService;
 import org.example.services.SampleService;
 
 import java.util.HashMap;
@@ -13,7 +13,7 @@ public class CommandService {
     private final Map<String, BaseHandler> commandList;
     private final org.example.services.SampleService sampleService;
 
-    public CommandService() {
+    public CommandService(SampleService sampleService, MeasurementService measurementService, ProtocolService protocolService) {
         this.commandList = new HashMap<>();
         this.commandList.put("exit", new ExitHandler());
         this.commandList.put("help", new HelpHandler());

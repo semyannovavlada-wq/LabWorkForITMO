@@ -1,5 +1,7 @@
 package org.example.cli.handlers;
 
+import org.example.services.MeasurementService;
+import org.example.services.ProtocolService;
 import org.example.services.SampleService;
 
 import java.util.Collection;
@@ -11,6 +13,11 @@ public class ExitHandler implements BaseHandler {
     public boolean handle(List<String> params,
                           SampleService sampleService,
                           Collection<BaseHandler> commandList) {
+        return false;
+    }
+
+    @Override
+    public boolean handle(List<String> params, SampleService sampleService, MeasurementService measurementService, ProtocolService protocolService, Collection<BaseHandler> commandList) {
         return false;
     }
 

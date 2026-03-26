@@ -3,6 +3,7 @@ package org.example.cli.handlers;
 import org.example.domain.Sample;
 import org.example.domain.SampleStatus;
 import org.example.services.MeasurementService;
+import org.example.services.ProtocolService;
 import org.example.services.SampleService;
 
 import java.time.Instant;
@@ -17,10 +18,15 @@ public class SampleUpdateHandler implements BaseHandler {
     }
 
     @Override
+    public boolean handle(List<String> params, SampleService sampleService, MeasurementService measurementService, ProtocolService protocolService, Collection<BaseHandler> commandList) {
+        return false;
+    }
+
+    @Override
     public boolean handle(List<String> params, SampleService sampleService, Collection<BaseHandler> commandList) {
         try {
             if (params == null || params.isEmpty()) {
-                System.out.println("Ошибка: не указан ID образца");
+                System.out.println("error: no ID ");
                 return true;
             }
 
@@ -28,12 +34,12 @@ public class SampleUpdateHandler implements BaseHandler {
             try {
                 id = Long.parseLong(params.get(0));
             } catch (NumberFormatException e) {
-                System.out.println("Ошибка: неверный формат ID");
+                System.out.println("error: wrong ID");
                 return true;
             }
 
             if (params.size() < 2) {
-                System.out.println("Ошибка: не указаны поля для обновления");
+                System.out.println("error: no fields");
                 return true;
             }
 
@@ -43,7 +49,7 @@ public class SampleUpdateHandler implements BaseHandler {
             for (int i = 1; i < params.size(); i++) {
                 String[] split = params.get(i).split("=", 2);
                 if (split.length != 2) {
-                    System.out.println("Ошибка: неверный формат параметра '" + params.get(i) + "'");
+                    System.out.println("error: wrong parameter format '" + params.get(i) + "'");
                     continue;
                 }
 
@@ -57,9 +63,9 @@ public class SampleUpdateHandler implements BaseHandler {
                 switch (key) {
                     case "name":
                         if (value.isEmpty()) {
-                            System.out.println("Ошибка: name не может быть пустым");
+                            System.out.println("error: name cant be null");
                         } else if (value.length() > 128) {
-                            System.out.println("Ошибка: название слишком длинное (макс. 128)");
+                            System.out.println("error: name is too long (max. 128)");
                         } else {
                             sample.setName(value);
                             updated = true;
@@ -68,9 +74,9 @@ public class SampleUpdateHandler implements BaseHandler {
 
                     case "type":
                         if (value.isEmpty()) {
-                            System.out.println("Ошибка: type не может быть пустым");
+                            System.out.println("error: type cant be null");
                         } else if (value.length() > 64) {
-                            System.out.println("Ошибка: тип слишком длинный (макс. 64)");
+                            System.out.println("error: type is too long(max. 64)");
                         } else {
                             sample.setType(value);
                             updated = true;
@@ -79,9 +85,9 @@ public class SampleUpdateHandler implements BaseHandler {
 
                     case "location":
                         if (value.isEmpty()) {
-                            System.out.println("Ошибка: location не может быть пустым");
+                            System.out.println("error: location can not be null");
                         } else if (value.length() > 64) {
-                            System.out.println("Ошибка: местоположение слишком длинное (макс. 64)");
+                            System.out.println("error: location is too long (max. 64)");
                         } else {
                             sample.setLocation(value);
                             updated = true;
@@ -94,12 +100,12 @@ public class SampleUpdateHandler implements BaseHandler {
                             sample.setStatus(newStatus);
                             updated = true;
                         } catch (IllegalArgumentException e) {
-                            System.out.println("Ошибка: статус только ACTIVE или ARCHIVED");
+                            System.out.println("error: ACTIVE or ARCHIVED");
                         }
                         break;
 
                     default:
-                        System.out.println("Ошибка: нельзя менять поле '" + key + "'");
+                        System.out.println("error: cant change'" + key + "'");
                         break;
                 }
             }
@@ -108,13 +114,13 @@ public class SampleUpdateHandler implements BaseHandler {
                 sample.setUpdatedAt(Instant.now());
                 System.out.println("OK");
             } else {
-                System.out.println("Ничего не обновлено");
+                System.out.println("no changes");
             }
 
         } catch (java.util.NoSuchElementException e) {
-            System.out.println("Ошибка: " + e.getMessage());
+            System.out.println("error: " + e.getMessage());
         } catch (Exception e) {
-            System.out.println("Ошибка: " + e.getMessage());
+            System.out.println("error: " + e.getMessage());
         }
 
         return true;
@@ -122,6 +128,6 @@ public class SampleUpdateHandler implements BaseHandler {
 
     @Override
     public String help() {
-        return "sample_update <id> field=value ... - update sample fields (name, type, location, status)";
+        return "SampleUpdate <id> field=value ... - update sample fields (name, type, location, status)";
     }
 }
