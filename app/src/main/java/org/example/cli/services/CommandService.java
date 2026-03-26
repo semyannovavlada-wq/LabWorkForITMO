@@ -16,7 +16,7 @@ public class CommandService {
     public CommandService() {
         this.commandList = new HashMap<>();
         this.commandList.put("exit", new ExitHandler());
-        this.commandList.put("help", (BaseHandler) new HelpHandler());
+        this.commandList.put("help", new HelpHandler());
 
         this.sampleService = new org.example.services.SampleService();
     }
