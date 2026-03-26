@@ -28,3 +28,39 @@ public final class Measurement {
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
     }
+
+    public long getId() { return id; }
+    public void setId(long id) { this.id = id; }
+
+    public long getSampleId() { return sampleId; }
+    public void setSampleId(long sampleId) { this.sampleId = sampleId; }
+
+    public MeasurementParam getParam() { return param; }
+    public void setParam(MeasurementParam param) { this.param = param; }
+
+    public double getValue() { return value; }
+    public void setValue(double value) { this.value = value; }
+
+    public String getUnit() { return unit; }
+    public void setUnit(String unit) { this.unit = unit; }
+
+    public String getMethod() { return method; }
+    public void setMethod(String method) { this.method = method; }
+
+    public Instant getMeasuredAt() { return measuredAt; }
+    public void setMeasuredAt(Instant measuredAt) { this.measuredAt = measuredAt; }
+
+    public String getOwnerUsername() { return ownerUsername; }
+    public void setOwnerUsername(String ownerUsername) { this.ownerUsername = ownerUsername; }
+
+    public Instant getCreatedAt() { return createdAt; }
+    public void setCreatedAt(Instant createdAt) { this.createdAt = createdAt; }
+
+    public Instant getUpdatedAt() { return updatedAt; }
+    public void setUpdatedAt(Instant updatedAt) { this.updatedAt = updatedAt; }
+
+    @Override
+    public String toString() {
+        return "id=" + id + "\nparam=" + param + "\nvalue=" + value + " " + unit;
+    }
+}

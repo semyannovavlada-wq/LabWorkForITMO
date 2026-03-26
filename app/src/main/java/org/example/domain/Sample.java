@@ -56,3 +56,36 @@ public final class Sample {
     public void setLocation(String location) {
         this.location = location;
     }
+
+    public SampleStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(SampleStatus status) {
+        this.status = status;
+    }
+
+    public String getOwnerUsername() {
+        return ownerUsername;
+    }
+
+    public void setOwnerUsername(String ownerUsername) {
+        this.ownerUsername = ownerUsername;
+    }
+
+    public Instant getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(Instant createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    public Instant getUpdatedAt() {
+        return updatedAt;
+    }
+
+    public void setUpdatedAt(Instant updatedAt) {
+        this.updatedAt = updatedAt;
+    }
+}
