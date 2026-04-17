@@ -2,35 +2,51 @@ package org.example.services;
 
 import org.example.domain.Sample;
 import org.example.domain.SampleStatus;
+import org.example.repository.SampleSaveLoad;
 import org.example.validator.SampleValidator;
-
 import java.time.Instant;
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class SampleService {
-    private final List<Sample> samples = new ArrayList<>();
-    private long nextId = 1L;
+    private Map<Long, Sample> samples;
+    private long nextId;
+    private final SampleSaveLoad storage;
 
-    public Sample add(String name, String type, String location,
-                      String ownerUsername, SampleStatus status) {
+    public SampleService(String dataDir) {
+        this.storage = new SampleSaveLoad(dataDir);
+        this.samples = new HashMap<>();
+        this.nextId = 1L;
+    }
+
+    public SampleService() {
+        this("data");
+    }
+
+    public void loadData() {
+        samples = storage.load();
+        if (samples.isEmpty()) {
+            samples = new HashMap<>();
+            nextId = 1L;
+        } else {
+            nextId = samples.keySet().stream().max(Long::compareTo).orElse(0L) + 1;
+        }
+    }
+
+    public void saveData() {
+        storage.save(samples);
+    }
+
+    public Sample add(String name, String type, String location, String ownerUsername, SampleStatus status) {
         SampleValidator.validateName(name);
         SampleValidator.validateType(type);
         SampleValidator.validateLocation(location);
         SampleValidator.validateOwnerUsername(ownerUsername);
 
-        Sample sample = new Sample(
-                nextId++,
-                name,
-                type,
-                location,
+        long id = nextId++;
+        Sample sample = new Sample(id, name, type, location,
                 status != null ? status : SampleStatus.ACTIVE,
-                ownerUsername,
-                Instant.now(),
-                Instant.now()
-        );
-
-        samples.add(sample);
+                ownerUsername, Instant.now(), Instant.now());
+        samples.put(id, sample);
         return sample;
     }
 
@@ -39,96 +55,64 @@ public class SampleService {
     }
 
     public Sample getById(long id) {
-        return samples.stream()
-                .filter(s -> s.getId() == id)
-                .findFirst()
-                .orElseThrow(() -> new NoSuchElementException("Ошибка: образец с id=" + id + " не найден"));
+        Sample sample = samples.get(id);
+        if (sample == null) {
+            throw new NoSuchElementException("Error: sample with id=" + id + " not found");
+        }
+        return sample;
     }
 
     public List<Sample> getAll() {
-        return samples.stream()
-                .sorted(Comparator.comparing(Sample::getId))
-                .collect(Collectors.toList());
+        return new ArrayList<>(samples.values());
     }
 
     public List<Sample> list(String statusFilter, boolean mineOnly, String currentUser) {
-        return samples.stream()
-                .filter(sample -> {
+        return samples.values().stream()
+                .filter(s -> {
                     if (statusFilter != null && !statusFilter.isEmpty()) {
                         try {
                             SampleStatus status = SampleStatus.valueOf(statusFilter.toUpperCase());
-                            if (sample.getStatus() != status) {
-                                return false;
-                            }
+                            if (s.getStatus() != status) return false;
                         } catch (IllegalArgumentException e) {
                             return false;
                         }
                     }
-                    if (mineOnly && currentUser != null && !currentUser.isEmpty()) {
-                        if (!sample.getOwnerUsername().equals(currentUser)) {
-                            return false;
-                        }
+                    if (mineOnly && currentUser != null) {
+                        if (!s.getOwnerUsername().equals(currentUser)) return false;
                     }
                     return true;
                 })
                 .sorted(Comparator.comparing(Sample::getId))
-                .collect(Collectors.toList());
+                .toList();
     }
 
     public Sample updateStatus(long id, SampleStatus newStatus, String ownerUsername) {
         Sample sample = getById(id);
-
         if (!sample.getOwnerUsername().equals(ownerUsername) && !"SYSTEM".equals(ownerUsername)) {
-            throw new SecurityException("Ошибка: нет прав на изменение этого образца");
+            throw new SecurityException("Error: no rights to modify this sample");
         }
-
         sample.setStatus(newStatus);
         sample.setUpdatedAt(Instant.now());
         return sample;
     }
 
-    public Sample updateLocation(long id, String newLocation, String ownerUsername) {
-        Sample sample = getById(id);
-
-        if (!sample.getOwnerUsername().equals(ownerUsername) && !"SYSTEM".equals(ownerUsername)) {
-            throw new SecurityException("Ошибка: нет прав на изменение этого образца");
-        }
-
-        SampleValidator.validateLocation(newLocation);
-        sample.setLocation(newLocation);
-        sample.setUpdatedAt(Instant.now());
-        return sample;
+    public void update(Sample sample) {
+        samples.put(sample.getId(), sample);
     }
 
     public boolean remove(long id, String ownerUsername) {
         Sample sample = getById(id);
-
         if (!sample.getOwnerUsername().equals(ownerUsername) && !"SYSTEM".equals(ownerUsername)) {
-            throw new SecurityException("Ошибка: нет прав на удаление этого образца");
+            throw new SecurityException("Error: no rights to delete this sample");
         }
-
         if (sample.getStatus() != SampleStatus.ARCHIVED) {
-            throw new IllegalStateException("Ошибка: можно удалить только образец со статусом ARCHIVED");
+            throw new IllegalStateException("Error: only ARCHIVED samples can be deleted");
         }
-
-        return samples.remove(sample);
+        samples.remove(id);
+        return true;
     }
 
     public boolean exists(long id) {
-        return samples.stream().anyMatch(s -> s.getId() == id);
-    }
-
-    public List<Sample> getByOwner(String ownerUsername) {
-        return samples.stream()
-                .filter(sample -> sample.getOwnerUsername().equals(ownerUsername))
-                .sorted(Comparator.comparing(Sample::getId))
-                .collect(Collectors.toList());
-    }
-
-    public List<Sample> getByStatus(SampleStatus status) {
-        return samples.stream()
-                .filter(sample -> sample.getStatus() == status)
-                .sorted(Comparator.comparing(Sample::getId))
-                .collect(Collectors.toList());
+        return samples.containsKey(id);
     }
 }
