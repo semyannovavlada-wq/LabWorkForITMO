@@ -14,6 +14,8 @@ dependencies {
     testImplementation(libs.junit.jupiter)
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
     implementation(libs.guava)
+    implementation("com.google.code.gson:gson:2.10.1")
+    implementation("com.google.code.gson:gson-jsr310:2.10.1")
 }
 
 java {

@@ -85,6 +85,18 @@ public class MeasurementService {
         return result;
     }
 
+    public void clear() {
+        measurements.clear();
+        nextId = 1L;
+    }
+
+    public void addExisting(Measurement measurement) {
+        measurements.add(measurement);
+        if (measurement.getId() >= nextId) {
+            nextId = measurement.getId() + 1;
+        }
+    }
+
     public void removeBySampleId(long sampleId) {
         measurements.removeIf(m -> m.getSampleId() == sampleId);
     }

@@ -51,6 +51,18 @@ public class SampleService {
                 .collect(Collectors.toList());
     }
 
+    public void clear() {
+        samples.clear();
+        nextId = 1L;
+    }
+
+    public void addExisting(Sample sample) {
+        samples.add(sample);
+        if (sample.getId() >= nextId) {
+            nextId = sample.getId() + 1;
+        }
+    }
+
     public List<Sample> list(String statusFilter, boolean mineOnly, String currentUser) {
         return samples.stream()
                 .filter(sample -> {

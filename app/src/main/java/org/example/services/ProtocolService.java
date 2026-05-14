@@ -70,6 +70,18 @@ public class ProtocolService {
                 .collect(Collectors.toList());
     }
 
+    public void clear() {
+        protocols.clear();
+        nextId = 1L;
+    }
+
+    public void addExisting(Protocol protocol) {
+        protocols.add(protocol);
+        if (protocol.getId() >= nextId) {
+            nextId = protocol.getId() + 1;
+        }
+    }
+
     public Protocol updateName(long id, String newName, String ownerUsername) {
         Protocol protocol = getById(id);
 
