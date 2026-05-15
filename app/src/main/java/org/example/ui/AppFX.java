@@ -1,4 +1,4 @@
-package org.example;
+package org.example.ui;
 
 import javafx.application.Application;
 import javafx.scene.Scene;
@@ -7,10 +7,8 @@ import org.example.services.MeasurementService;
 import org.example.services.ProtocolService;
 import org.example.services.SampleService;
 import org.example.storage.StorageService;
-import org.example.ui.MainView;
-import org.example.ui.SampleController;
 
-public class App extends Application {
+public class AppFX extends Application {
 
     public static void main(String[] args) {
         launch(args);
