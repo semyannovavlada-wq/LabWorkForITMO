@@ -4,6 +4,7 @@ import org.example.cli.handlers.*;
 import org.example.services.MeasurementService;
 import org.example.services.ProtocolService;
 import org.example.services.SampleService;
+import org.example.storage.StorageService;
 
 import java.util.HashMap;
 import java.util.List;
@@ -11,9 +12,18 @@ import java.util.Map;
 
 public class CommandService {
     private final Map<String, BaseHandler> commandList;
-    private final org.example.services.SampleService sampleService;
+    private final SampleService sampleService;
+    private final MeasurementService measurementService;
+    private final ProtocolService protocolService;
 
-    public CommandService(SampleService sampleService, MeasurementService measurementService, ProtocolService protocolService) {
+    public CommandService(SampleService sampleService,
+                          MeasurementService measurementService,
+                          ProtocolService protocolService) {
+        this.sampleService = sampleService;
+        this.measurementService = measurementService;
+        this.protocolService = protocolService;
+        StorageService storageService = new StorageService(sampleService, measurementService, protocolService);
+
         this.commandList = new HashMap<>();
         this.commandList.put("exit", new ExitHandler());
         this.commandList.put("help", new HelpHandler());
@@ -27,13 +37,11 @@ public class CommandService {
         this.commandList.put("SampleList", new SampleListHandler());
         this.commandList.put("SampleShow", new SampleShowHandler());
         this.commandList.put("SampleUpdate", new SampleUpdateHandler());
-
-
-        this.sampleService = new org.example.services.SampleService();
+        this.commandList.put("save", new SaveHandler(storageService));
+        this.commandList.put("load", new LoadHandler(storageService));
     }
 
     public boolean readCommand(List<String> commands) {
-        // Проверяем, что список не пустой и получаем команду
         if (commands == null || commands.isEmpty()) {
             System.out.println("Command not found");
             return true;
@@ -44,7 +52,7 @@ public class CommandService {
 
         if (handler != null) {
             List<String> args = commands.subList(1, commands.size());
-            return handler.handle(args, sampleService, commandList.values());
+            return handler.handle(args, sampleService, measurementService, protocolService, commandList.values());
         }
 
         System.out.println("Command not found");
